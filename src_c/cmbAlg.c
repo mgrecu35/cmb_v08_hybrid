@@ -23,6 +23,9 @@ void writescant_300_(int *isc);
 //begin 2/9/22 WSO declare status variable for GMI/TMI
 int st_GMITMI2_c;
 //end 2/9/22 WSO
+void init_onnx_runtime_(void);
+void init_onnx_(void);
+void read_scaler_data_(void);
 int main(int argc, char *argv[])
 {
   char  fname[100];
@@ -37,7 +40,8 @@ int main(int argc, char *argv[])
       exit(1);}
   
   strcpy(jobname, argv[1]);
-  
+  init_onnx_(); /*init onnx */
+  read_scaler_data_();/*read scalers*/
   strcpy(&fname[0],argv[2]);
   printf("%s \n",&fname[0]);
   int ialg;
@@ -60,9 +64,11 @@ int main(int argc, char *argv[])
   int idir;
   int icL;
   int nchunk=ndpr/300;
-  //nchunk=2;
+  nchunk=2;
   printf("nchunk = %d\n",nchunk);
-  //printf("here \n");
+  printf("init done \n");
+  //exit(0);
+  
   if(ndpr>0)
     {
       for(i=0;i<=nchunk;i++)
