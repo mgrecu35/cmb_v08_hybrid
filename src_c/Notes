@@ -1,0 +1,2 @@
+apply Nw-Dm to both land and ocean
+make dNcv shift (line 699 in ensFilter) =0.4 (previously was 0.6)

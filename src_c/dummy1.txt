@@ -1,0 +1,28 @@
+void copy_tot_to_liqwatercont_ku_(int *ij, float *precipTot, int *node)
+{
+  int i;
+  extern L2BCMB_SWATHS swathx;
+  for(i=node[0];i<=node[1];i++)
+    swathx.KuGMI.precipLiqWaterCont[*ij][i]=0.0;
+  int n3=node[3];
+  if(n3>node[4])
+    n3=node[4];
+  for(i=node[1]+1;i<=n3;i++)
+    if(precipTot[i]>=-1e-9)
+      {
+        float f=(i-node[1])/(node[3]-node[1]+1e-3);
+        swathx.KuGMI.precipLiqWaterCont[*ij][i]=f*precipTot[i];
+      }
+    else
+      swathx.KuGMI.precipLiqWaterCont[*ij][i]=missing_r4c;
+  int node4=node[4]+1;
+  if(node4>87)
+    node4=87;
+  for(i=node[3]+1;i<=node4;i++)
+    if(precipTot[i]>=-1e-9)
+      swathx.KuGMI.precipLiqWaterCont[*ij][i]=precipTot[i];
+    else
+      swathx.KuGMI.precipLiqWaterCont[*ij][i]=missing_r4c;
+  for(i=node[4]+1;i<88;i++)
+    swathx.KuGMI.precipLiqWaterCont[*ij][i]=missing_r4c;
+}

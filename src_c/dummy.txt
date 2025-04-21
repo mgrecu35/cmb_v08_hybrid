@@ -1,0 +1,101 @@
+clutterCorrection_bzd.c:#include "TK_2BCMB_hdf5.h"
+clutterCorrection_bzd.old.c:#include "TK_2BCMB_hdf5.h"
+clutterCorrection.c:#include "TK_2BCMB_hdf5.h"
+clutterCorrection.old.c:#include "TK_2BCMB_hdf5.h"
+io_subs.c://#include <hdf.h>
+io_subs.c://#include <mfhdf.h>
+meta_assign.c://#include <hdf.h>
+meta_assign.c:#include <mfhdf.h>
+oe_output_kugmi.c:#include <hdf.h>
+oe_output_kugmi.c:#include <mfhdf.h>
+oe_output_kugmi.c:#include "TK_2BCMB_hdf5.h"
+readENV.01.c:#include <hdf.h>
+readENV.01.c:#include <mfhdf.h>
+readENV.01.c:#include "TK_2AKuENV_ah6_hdf5.h"
+readENV.01.c:#include "TK_2AKuENV_hdf5.h"
+readENV.01.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.01.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.01.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.old.c:#include <hdf.h>
+readENV.01.old.c:#include <mfhdf.h>
+readENV.01.old.c:#include "TK_2AKuENV_ah6_hdf5.h"
+readENV.01.old.c:#include "TK_2AKuENV_hdf5.h"
+readENV.01.old.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.01.old.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.old.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.old.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.01.old.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.01.old.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.c:#include <hdf.h>
+readENV.c:#include <mfhdf.h>
+readENV.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.c://      status = TKopen(&f2akuENV[0], "2AKuENV_aa1", TKREAD, "HDF5", 
+readENV.c:        status_alpha = TKopen(&f2akuENV[0], "2APRENV", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+readENV.c:        status_alpha = TKopen(&f2akuENV[0], "2AKuENVX", TKREAD, "HDF5",  jobname, &granuleHandle2AKuENV, 1);
+read_GPM.c:#include <hdf.h>
+read_GPM.c:#include <mfhdf.h>
+read_GPM.c://aa   status = TKopen(granuleID,"1CGMI", TKREAD, "HDF5", jobname, &tkfileinfo, 1);
+read_GPM.c:    status_alpha = TKopen(granuleID,"1CGMI", TKREAD, "HDF5", jobname, &tkfileinfo, 1);
+read_GPM.c:    status = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_GPM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM.c://    status = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_GPM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM.c:	    *status_alpha = TKopen(dprfname,"2ADPR",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_GPM.c://	    status = TKopen(dprfname,"2ADPR_aa1",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_GPM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM.c:  status_alpha = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_GPM_FS.c:#include <hdf.h>
+read_GPM_FS.c:#include <mfhdf.h>
+read_GPM_FS.c:#include "TK_2AKu_hdf5.h"
+read_GPM_FS.c:    status = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_GPM_FS.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM_FS.c://    status = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_GPM_FS.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM_FS.c:	    *status_alpha = TKopen(dprfname,"2ADPR",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_GPM_FS.c://	    status = TKopen(dprfname,"2ADPR_aa1",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_GPM_FS.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_GPM_FS.c:  status_alpha = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_TRMM.c:#include <hdf.h>
+read_TRMM.c:#include <mfhdf.h>
+read_TRMM.c://aa   status = TKopen(granuleID,"1CGMI", TKREAD, "HDF5", jobname, &tkfileinfo, 1);
+read_TRMM.c:    status_alpha = TKopen(granuleID,"1CTMI", TKREAD, "HDF5", jobname, &tkfileinfo, 1);
+read_TRMM.c:    status = TKopen(&fname[0], "2APR", TKREAD, "HDF5", jobname,
+read_TRMM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_TRMM.c://    status = TKopen(&fname[0], "2AKu", TKREAD, "HDF5", jobname,
+read_TRMM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_TRMM.c:	    *status_alpha = TKopen(dprfname,"2ADPR",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_TRMM.c://	    status = TKopen(dprfname,"2ADPR_aa1",TKREAD,"HDF5",jobname,&dprtkfile,1);
+read_TRMM.c://  status = TKopen(&fname[0], "2AKu_aa1", TKREAD, "HDF5", jobname,
+read_TRMM.c:  status_alpha = TKopen(&fname[0], "2APR", TKREAD, "HDF5", jobname,
+writeCMBOut_TK.c:#include <hdf.h>
+writeCMBOut_TK.c:#include <mfhdf.h>
+writeCMBOut_TK.c:#include "TK_2BCMB_hdf5.h"
+writeCMBOut_TK.c:  ret = TKopen(fname, "2BCMB", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+writeCMBOut_TK.c:  ret = TKopen(fname, "2BCMB", TKREAD, "HDF5", jobname, &ctkfileIn, 1);
+writeCMBOut_TK_FS.c:#include <hdf.h>
+writeCMBOut_TK_FS.c:#include <mfhdf.h>
+writeCMBOut_TK_FS.c:#include "TK_2BCMB_hdf5.h"
+writeCMBOut_TK_FS.c:  ret = TKopen(fname, "2BCMB", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+write_CMBOut_TK_FS.old.c:#include <hdf.h>
+write_CMBOut_TK_FS.old.c:#include <mfhdf.h>
+write_CMBOut_TK_FS.old.c:#include "TK_2BCMB_hdf5.h"
+write_CMBOut_TK_FS.old.c:  ret = TKopen(fname, "2BCMB", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+writeCMBOut_TK_FS.old.c:#include <hdf.h>
+writeCMBOut_TK_FS.old.c:#include <mfhdf.h>
+writeCMBOut_TK_FS.old.c:#include "TK_2BCMB_hdf5.h"
+writeCMBOut_TK_FS.old.c:  ret = TKopen(fname, "2BCMB", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+writeCMBOut_TK_FS.veryold.c:#include <hdf.h>
+writeCMBOut_TK_FS.veryold.c:#include <mfhdf.h>
+writeCMBOut_TK_FS.veryold.c:#include "TK_2BCMB_hdf5.h"
+writeCMBOut_TK_FS.veryold.c:  ret = TKopen(fname, "2BCMB", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+writeCMBTOut_TK.c:#include <hdf.h>
+writeCMBTOut_TK.c:#include <mfhdf.h>
+writeCMBTOut_TK.c:#include "TK_2BCMBT_hdf5.h"
+writeCMBTOut_TK.c:  ret = TKopen(fname, "2BCMBT", TKWRITE, "HDF5", jobname, &ctkfile,1); //WSO 04/07/2013
+writeCMBTOut_TK.c:  ret = TKopen(fname, "2BCMB", TKREAD, "HDF5", jobname, &ctkfileIn, 1);
+writeDiagnost.c:#include "hdf5.h"
