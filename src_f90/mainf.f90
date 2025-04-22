@@ -727,7 +727,7 @@ subroutine do_chunkx(i,ialg, idir)
           dPRData%localZenithAngle, dPRData%elevation, st_2adpr,         &
           dPRData%secondOfDay,dPRData%NSRelibFlag,dPRData%MSRelibFlag,   &
           dPRdata%snowIceCover, dPRdata%seaIceConcentration, dPRdata%cBEst, &
-          dPRData%envTemp,dPRData%binClutterFree,dPRData%binZeroDegree)
+          dPRData%envTemp,dPRData%binClutterFree,dPRData%binZeroDegree,dPRData%surfaceType)
   endif
   print*, maxval(dPRData%xlat)
   IF (i .EQ. 1) PRINT *,'File read status 2ADPR : ',st_2adpr
@@ -793,17 +793,25 @@ subroutine do_chunkx(i,ialg, idir)
   if(iEnd<ngmi_total) iEnd=iEnd+1
   iEnd=min(ngmi_total,iEnd+70)
   iStart=max(1,iStart-70)
-  print*,  'istart=',iStart,iEnd, nfov, nch1, nch2, nray, dPRData%n1c21
+  !print*,  'istart=',iStart,iEnd, nfov, nch1, nch2, nray, dPRData%n1c21
   !stop
   allocate(tb_resampled(dPRData%n1c21,nray,nch1+nch2))
   call grid_chunk_tb(istart, iend, nfov, nch1, gmiData%s1lon(1:nfov,istart:iend), &
        gmiData%s1lat(1:nfov,istart:iend), gmiData%gmiS1(1:nch1,1:nfov,istart:iend), &
-       dPRData%n1c21, nray, dPRData%xlon(:,1:dPRData%n1c21), dPRData%xlat(:,1:dPRData%n1c21),&
-       tb_resampled(1:dPRData%n1c21,nray,1:nch1))
+       dPRData%n1c21, nray, dPRData%xlon(1:nray,1:dPRData%n1c21), &
+       dPRData%xlat(1:nray,1:dPRData%n1c21),&
+       tb_resampled(1:dPRData%n1c21,1:nray,1:nch1))
   
+  call grid_chunk_tb(istart, iend, nfov, nch2, gmiData%s2lon(1:nfov,istart:iend), &
+       gmiData%s2lat(1:nfov,istart:iend), gmiData%gmiS2(1:nch2,1:nfov,istart:iend), &
+       dPRData%n1c21, nray, dPRData%xlon(1:nray,1:dPRData%n1c21), &
+       dPRData%xlat(1:nray,1:dPRData%n1c21),&
+       tb_resampled(1:dPRData%n1c21,1:nray,nch1+1:nch1+nch2))
+  !  grid_chunk_tb(istart, iend, nfov, nch, gmi_lon_orig, gmi_lat_orig, tc_orig, &
+  !    ndpr, nray, lon_dpr, lat_dpr, tb_resampled)
   call reSampleGMI(gmiData,iStart,iEnd,gmi2Grid,i)
   !print*, maxval(gmiData%gmiS13(1:9,:,:))
-  stop
+  !stop
   sysdN=0.0
   sysdN=-.25 !new calibration !-0.25 ITE
   print*, 'allocate dPRRet'

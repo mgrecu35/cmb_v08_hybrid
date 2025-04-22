@@ -153,7 +153,7 @@ module f90DataTypes
      !the following variables are in the OE structure, but not currently output (we may have chosen to remove these from the toolkit per email discussion):
      !OptEst/interpFlag 
      !OptEst/columnCloudIceWater
-     
+     integer, dimension(:,:), pointer :: surfaceType
      real, dimension(:), pointer :: SecondOfDay ! 4/14/14 MG
   end type dPRDataType
 

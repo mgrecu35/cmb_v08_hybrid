@@ -94,6 +94,7 @@ subroutine allocateDPRSpace(this, ngates, nrays, n)
        this%dsrtsigmaPIAku(nrays,n), this%dsrtsigmaPIAka(nrays,n))
   allocate(this%srtrelPIAku(nrays,n), this%dsrtrelPIA(nrays,n))
   allocate(this%MSRelibFlag(nrays,n), this%NSRelibFlag(nrays,n))
+  allocate(this%surfaceType(nrays,n))
 !end    WSO 9/28/13
 !end    WSO 9/10/13
 !end    WSO 9/5/13
@@ -498,6 +499,7 @@ subroutine deallocateDPRSpace()
   deallocate(this%srtrelPIAku, this%dsrtrelPIA)
   deallocate(this%MSRelibFlag, this%NSRelibFlag)
   deallocate(this%sigmaZeroKu, this%sigmaZeroKa)
+  deallocate(this%surfaceType)
 !end    WSO 9/28/13
 !end    WSO 9/10/13
 !end    WSO 9/5/13

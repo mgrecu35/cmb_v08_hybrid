@@ -88,7 +88,7 @@ void read2akux_(char *jobname, char *f2aku, int *n1c21,
 		float *localZenithAngle, float *elevation, int *status_alpha,
 		float *secondOfDay, int *NSRelibFlag, int *MSRelibFlag,
 		int *snowIceCover, float *seaIceConcentration, float *cBEst,
-		float *envTemp, int *binClutterFree, int *binZeroDegree)
+		float *envTemp, int *binClutterFree, int *binZeroDegree, int *surfaceType)
 //end    WSO 08/18/14
 //  SFM  end    04/16/2014
 //  SFM  end   12/12/2013
@@ -569,6 +569,7 @@ void read2akux_(char *jobname, char *f2aku, int *n1c21,
 	  if(L2AKuDataX.CSF.binBBPeak[j]>10)
 	    raintype[ipia]=100;
 	  freezH[ipia]=L2AKuDataX.VER.heightZeroDeg[j];
+	  surfaceType[ipia]=L2AKuDataX.PRE.landSurfaceType[j];
 	  dprrain[ipia]=dprxswath.FS.SLV.precipRateNearSurface[j];
 //end    WSO 9/13/13
 //begin  WSO 9/5/13 calculate uncertainty estimates at Ku and Ka
@@ -583,6 +584,7 @@ void read2akux_(char *jobname, char *f2aku, int *n1c21,
 	   dsrtPIAka[ipia]=dprxswath.FS.SRT.pathAtten[j][1];
 	   dsrtrelPIA[ipia]=dprxswath.FS.SRT.reliabFactor[j];
 	   MSRelibFlag[ipia]=dprxswath.FS.SRT.reliabFlag[j];
+
 //begin  WSO 11/17/15  exclude cases where reliabFactor is zero
       dsrtsigmaPIAku[ipia] = missing_r4c;
       if(dprxswath.FS.SRT.pathAtten[j][0] > -9990. && (dprxswath.FS.SRT.reliabFactor[j] > 1.e-5 || dprxswath.FS.SRT.reliabFactor[j] < -1.e-5))
