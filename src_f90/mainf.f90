@@ -666,6 +666,12 @@ subroutine do_chunkx(i,ialg, idir)
   real :: x1L, x2L
   INTEGER*4     readenv, readenvx , readenvt
   real :: dprrain(49,300)
+  integer :: nfov, nray, nch1, nch2
+  real, allocatable :: tb_resampled(:,:,:)
+  nfov=221
+  nray=49
+  nch1=9
+  nch2=4
   print*,'ichunk=', i, nMemb, istart
   ic=i*nBSize
   !jobnamec(1)='j'
@@ -787,11 +793,17 @@ subroutine do_chunkx(i,ialg, idir)
   if(iEnd<ngmi_total) iEnd=iEnd+1
   iEnd=min(ngmi_total,iEnd+70)
   iStart=max(1,iStart-70)
-  !print*,  'istart=',iStart,iEnd, i
+  print*,  'istart=',iStart,iEnd, nfov, nch1, nch2, nray, dPRData%n1c21
   !stop
+  allocate(tb_resampled(dPRData%n1c21,nray,nch1+nch2))
+  call grid_chunk_tb(istart, iend, nfov, nch1, gmiData%s1lon(1:nfov,istart:iend), &
+       gmiData%s1lat(1:nfov,istart:iend), gmiData%gmiS1(1:nch1,1:nfov,istart:iend), &
+       dPRData%n1c21, nray, dPRData%xlon(:,1:dPRData%n1c21), dPRData%xlat(:,1:dPRData%n1c21),&
+       tb_resampled(1:dPRData%n1c21,nray,1:nch1))
+  
   call reSampleGMI(gmiData,iStart,iEnd,gmi2Grid,i)
   !print*, maxval(gmiData%gmiS13(1:9,:,:))
-  !stop
+  stop
   sysdN=0.0
   sysdN=-.25 !new calibration !-0.25 ITE
   print*, 'allocate dPRRet'
@@ -820,7 +832,7 @@ subroutine do_chunkx(i,ialg, idir)
   !     i, st_2adpr,orbitNumber,iStart,iEnd)
   
   
-  
+  deallocate(tb_resampled)
   ! iStart=iEnd       SFM  04/16/2014   for M.Grecu; node processing
   print*, 'ichunks=',i, ran1()
 end subroutine do_chunkx
