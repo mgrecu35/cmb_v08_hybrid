@@ -666,12 +666,14 @@ subroutine do_chunkx(i,ialg, idir)
   real :: x1L, x2L
   INTEGER*4     readenv, readenvx , readenvt
   real :: dprrain(49,300)
-  integer :: nfov, nray, nch1, nch2
+  integer :: nfov, nray, nch1, nch2, nfeat_in, nfeat_out
   real, allocatable :: tb_resampled(:,:,:)
   nfov=221
   nray=49
   nch1=9
   nch2=4
+  nfeat_in=19
+  nfeat_out=12
   print*,'ichunk=', i, nMemb, istart
   ic=i*nBSize
   !jobnamec(1)='j'
@@ -809,6 +811,16 @@ subroutine do_chunkx(i,ialg, idir)
        tb_resampled(1:dPRData%n1c21,1:nray,nch1+1:nch1+nch2))
   !  grid_chunk_tb(istart, iend, nfov, nch, gmi_lon_orig, gmi_lat_orig, tc_orig, &
   !    ndpr, nray, lon_dpr, lat_dpr, tb_resampled)
+  if(i.eq.3) then
+     call test_model_1d_onnx(tb_resampled,dPRData%surfaceType(1:nray,1:dPRData%n1c21),&
+       dPRData%envSknTemp,dPRData%envQv,dPRData%n1c21,nray,nch1+nch2,nbin, nfeat_in, nfeat_out,&
+       dPRData%nn_output)
+!     test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
+!     qv_f,ndpr,nray,nchan,nbin,&
+!     nfeat_in,nfeat_out,x_output_f)
+  endif
+! test_onnx(tb_resampled,surfaceType_f,skTemp_f,qv_f,ndpr,nray,nchan,nbin,&
+!    nfeat_in,nfeat_out,x_output_f)
   call reSampleGMI(gmiData,iStart,iEnd,gmi2Grid,i)
   !print*, maxval(gmiData%gmiS13(1:9,:,:))
   !stop
