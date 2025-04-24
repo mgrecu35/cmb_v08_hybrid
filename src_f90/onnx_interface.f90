@@ -10,14 +10,14 @@ end subroutine init_onnx
 
 subroutine read_scaler_data()
     use scalers
-    open(10,file="GMI_ONNX_Models/scaler_land_qv.bin",form="unformatted",status="old")
+    open(10,file="GMI-models/scaler_land_qv.bin",form="unformatted",status="old")
     read(10) scaler_land_qv%mean
     read(10) scaler_land_qv%std
     close(10)
-    open(10,file="GMI_ONNX_Models/scaler_ocean_qv.bin",form="unformatted",status="old")
+    open(10,file="GMI-models/scaler_ocean_qv.bin",form="unformatted",status="old")
     read(10) scaler_ocean_qv%mean
     read(10) scaler_ocean_qv%std
-    open(10,file="GMI_ONNX_Models/norm_param_150_land.bin",form="unformatted",status="old")
+    open(10,file="GMI-models/norm_param_150_land.bin",form="unformatted",status="old")
     read(10)scaler_land%tc
     read(10)scaler_land%sfc_type
     read(10)scaler_land%sk_temp
@@ -27,7 +27,7 @@ subroutine read_scaler_data()
     read(10)scaler_land%xenc_prec
     read(10)scaler_land%xenv_enc
     close(10)
-    open(10,file="GMI_ONNX_Models/norm_param_150_ocean.bin",form="unformatted",status="old")
+    open(10,file="GMI-models/norm_param_150_ocean.bin",form="unformatted",status="old")
     read(10)scaler_ocean%tc
     read(10)scaler_ocean%sfc_type
     read(10)scaler_ocean%sk_temp
@@ -37,6 +37,10 @@ subroutine read_scaler_data()
     read(10)scaler_ocean%xenc_prec
     read(10)scaler_ocean%xenv_enc
     close(10)
+
+    call read_scaler_1d(scaler_1d_land,"GMI-models/scaler_1d_land.txt")
+    call read_scaler_1d(scaler_1d_ocean,"GMI-models/scaler_1d_ocean.txt")
+    !stop
 end subroutine read_scaler_data
 
 subroutine call_dense_qv(tskin,qv,isurf,x_output)

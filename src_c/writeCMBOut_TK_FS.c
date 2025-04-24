@@ -108,6 +108,16 @@ void setlatlons1_fs_(float *lat, float *lon, float *sfcPrecip,
     }
 }
 
+void set_gmi_sfc_precip_fs_(float *gmi_sfcPrecip)
+{
+  int i;
+  extern L2BCMB_SWATHS swathx;
+  for(i=0;i<49;i++)
+    {
+      swathx.GMI.GEestimSurfPrecipTotRate[i]=gmi_sfcPrecip[i];
+    }
+}
+
 void setlatlons2_fs_(float *lat, float *lon, float *sfcPrecip, 
 		     float *sfcPrecipStd, float *piaOutKu, float *piaOutKa,
 		     int *scanPatternFlag)

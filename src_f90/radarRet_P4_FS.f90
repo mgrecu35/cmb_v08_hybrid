@@ -1060,6 +1060,7 @@ do j=1,dPRData%n1c21
    else
       call setlatlons1_fs( dPRData%xlat(:,j), dPRData%xlon(:,j),                &
            sfcRain(:,j),sfcRainStd(:,j),piaOut(:,j))
+      call set_gmi_sfc_precip_fs(dPRData%nn_output(2,:,j))
       call setlatlons2_fs( dPRData%xlat(:,j), dPRData%xlon(:,j),                 &
            sfcRainMS(:,j),sfcRainStdMS(:,j),piaOutKuMS(:,j),piaOutKaMS(:,j),&
            flagScanPattern)
