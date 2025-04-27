@@ -131,7 +131,7 @@ subroutine test_onnx(tb_resampled,surfaceType_f,skTemp_f,qv_f,ndpr,nray,nchan,nb
     integer :: istart, ioffset2, nfeat_in, nfeat_out, n_inp, n_calls, isurf
     real :: x_output(ndpr,nray,nfeat_out)
     real :: x_output_f(nfeat_out,nray,ndpr)
-
+    real :: x_output_1d(62)
     n_inp=32
     !nfeat_in=19
     !nfeat_out=12
@@ -217,7 +217,7 @@ end subroutine test_onnx
 
 subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
      qv_f,ndpr,nray,nchan,nbin,&
-     nfeat_in,nfeat_out,x_output_f)
+     nfeat_in,nfeat_out,x_output_f,x_output_prof)
     use scalers
     implicit none
     integer :: ndpr, nray, nbin, nchan
@@ -228,13 +228,12 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
     integer :: surfaceType(ndpr,nray)
     real :: skTemp(ndpr,nray)
     real :: qv(ndpr,nray,nbin)
-    real :: azimuthAngle(25)
-    real :: x_input(ndpr,49,19)
     integer :: itype, n150, i, j, ichunk, icount, patch_type(ndpr)
     real :: x_qv_enc(4)
     integer :: istart, ioffset2, nfeat_in, nfeat_out, n_inp, n_calls, isurf
-    real :: x_input_1d(16), x_output_1d(8)
+    real :: x_input_1d(16), x_output_1d(8), x_output_prof_1d(62)
     real,intent(out) :: x_output_f(nfeat_out,nray,ndpr)
+    real,intent(out) :: x_output_prof(ndpr,nray,88)
     integer :: model_index, input_index, output_index
    
     do i=1,ndpr
@@ -254,7 +253,8 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
              isurf=1
              model_index=8
           end if
-          
+          !X_input=torch.tensor(np.concatenate((tc_scaled,sfc_type_scaled[:,np.newaxis],sk_temp_scaled[:,np.newaxis],qv_scaled[:,np.newaxis]),axis=-1),dtype=torch.float32)
+
           if(isurf==1) then
              x_input_1d(1:13)=(tb_resampled(i,j,1:13)-scaler_1d_land%tc_mean)/&
                   scaler_1d_land%tc_std
@@ -279,12 +279,20 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
           call set_input_data(model_index, input_index, x_input_1d)
           call call_onnx(model_index)
           call get_output_data(model_index, output_index, x_output_1d)
+          model_index=model_index-2
+          call set_input_data(model_index, input_index, x_input_1d)
+          call call_onnx(model_index)
+          call get_output_data(model_index, output_index, x_output_prof_1d)
+          x_output_prof_1d=x_output_prof_1d*0.5+0.8
+          x_output_prof_1d=0.1*(10**x_output_prof_1d-1)
           if(isurf==1) then
              x_output_1d(2)=x_output_1d(2)*scaler_1d_land%near_sfc_precip_std+&
                   scaler_1d_land%near_sfc_precip_mean
+             x_output_prof(i,j,21:82)=x_output_prof_1d(1:62)
           else
              x_output_1d(2)=x_output_1d(2)*scaler_1d_ocean%near_sfc_precip_std+&
                   scaler_1d_ocean%near_sfc_precip_mean
+             x_output_prof(i,j,23:84)=x_output_prof_1d(1:62)
           endif
           x_output_f(2,j,i)=0.1*(10**x_output_1d(2)-1)
         end do

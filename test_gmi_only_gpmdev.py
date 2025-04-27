@@ -54,7 +54,7 @@ print(surf_type[n1:n2].T.shape)
 print(sk_temp[n1:n2].T.shape)
 print(qv[n1:n2].T.shape)
 
-x_output_f = onnx_f90.test_model_1d_onnx(tb_resampled[n1:n2],surf_type[n1:n2].T,sk_temp[n1:n2].T,qv[n1:n2].T,nfeat_in,nfeat_out)
+x_output_f, xoutput_profs = onnx_f90.test_model_1d_onnx(tb_resampled[n1:n2],surf_type[n1:n2].T,sk_temp[n1:n2].T,qv[n1:n2].T,nfeat_in,nfeat_out)
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -68,3 +68,8 @@ x_output_f[1,:,:][x_output_f[1,:,:]<0.1]=0.0
 plt.pcolormesh(lon[n1:n2,:],lat[n1:n2,:],x_output_f[1,:,:].T,cmap='jet',norm=matplotlib.colors.LogNorm(vmin=0.1,vmax=100))
 ax.coastlines()
 
+plt.figure()
+xoutput_profs[xoutput_profs<0.1]=0.0
+plt.pcolormesh(lon[n1:n2,24],range(88),xoutput_profs[:,24,:].T,cmap='jet',norm=matplotlib.colors.LogNorm(vmin=0.1,vmax=100))
+plt.ylim(87,20)
+plt.colorbar()
