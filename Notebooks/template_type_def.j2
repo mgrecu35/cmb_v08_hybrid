@@ -1,0 +1,18 @@
+module {{ module_name }}
+  type :: {{ type_name }}
+    integer :: nscan, nray, nBnEnv,nBnPSD, nemiss
+  {%for field in fields %} {{ field.dtype }}, dimension({% for _ in range(field.ndim) %}: {% if not loop.last %},{% endif %}{% endfor %}), pointer :: {{ field.varname }} 
+  {%endfor %}
+  end type {{ type_name }}
+end module {{ module_name }}
+subroutine allocate_ge_data(this, nscan, nray, nBnEnv, nBnPSD, nemiss)
+    use {{ module_name }}
+    type({{ type_name }}) :: this
+    this%nscan = nscan
+    this%nray = nray
+    this%nBnEnv = nBnEnv
+    this%nBnPSD = nBnPSD
+    this%nemiss = nemiss
+    {% for field in fields %}allocate(this%{{field.varname}}({{field.alloc_params}})) 
+    {% endfor %}
+end subroutine allocate_ge_data
