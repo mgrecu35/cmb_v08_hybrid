@@ -10,6 +10,7 @@ end subroutine init_onnx
 
 subroutine read_scaler_data()
     use scalers
+    use sky_scalers
     open(10,file="GMI-models/scaler_land_qv.bin",form="unformatted",status="old")
     read(10) scaler_land_qv%mean
     read(10) scaler_land_qv%std
@@ -40,6 +41,7 @@ subroutine read_scaler_data()
 
     call read_scaler_1d(scaler_1d_land,"GMI-models/scaler_1d_land.txt")
     call read_scaler_1d(scaler_1d_ocean,"GMI-models/scaler_1d_ocean.txt")
+    call init_all_sky_scalers(all_sky_scaler_land,all_sky_scaler_ocean)
     !stop
 end subroutine read_scaler_data
 

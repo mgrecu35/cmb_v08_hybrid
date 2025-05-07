@@ -55,8 +55,8 @@ print(tb_resampled[n1:n2].shape)
 print(surf_type[n1:n2].T.shape)
 print(sk_temp[n1:n2].T.shape)
 print(qv[n1:n2].T.shape)
-
-x_output_f, xoutput_profs = onnx_f90.test_model_1d_onnx(tb_resampled[n1:n2],surf_type[n1:n2].T,sk_temp[n1:n2].T,qv[n1:n2].T,nfeat_in,nfeat_out)
+nfeat_oe=28
+x_output_f, xoutput_profs, x_output_oe = onnx_f90.test_model_1d_onnx(tb_resampled[n1:n2],surf_type[n1:n2].T,sk_temp[n1:n2].T,qv[n1:n2].T,nfeat_out,nfeat_oe)
 for i in range(n1,n2):
     for j in range(49):
         if surf_type[i,j] == 0:
@@ -76,11 +76,13 @@ import precip_align as pal
 #corr_coeff_f90=pal.calc_correlation(w1,w2)
 #print(corr_coeff,corr_coeff_f90)
 #precip_gmi_only_shifted = pal.align_precip(precip_gmi_only,precip_corra)
+nfeat_oe=28
 for i in range(0,n_scans,300):
     n1i=i
     n2i=i+300
     print(n1i,n2i)
-    x_output_fi, xoutput_profsi = onnx_f90.test_model_1d_onnx(tb_resampled[n1i:n2i],surf_type[n1i:n2i].T,sk_temp[n1i:n2i].T,qv[n1i:n2i].T,nfeat_in,nfeat_out)
+    x_output_fi, xoutput_profsi, x_output_oe = onnx_f90.test_model_1d_onnx(tb_resampled[n1i:n2i],surf_type[n1i:n2i].T,sk_temp[n1i:n2i].T,qv[n1i:n2i].T,nfeat_out,nfeat_oe)
+    #x_output_f,x_output_prof,x_output_oe = test_model_1d_onnx(tb_resampled,surfacetype_f,sktemp_f,qv_f,nfeat_out,nfeat_oe,[ndpr,nray,nchan,nbin])
     precip_corra=near_sfc_precip[n1i:n2i,:]
     precip_gmi_only=x_output_fi[1,:,:].T
     precip_gmi_only_shifted = pal.align_precip(precip_gmi_only,precip_corra)
