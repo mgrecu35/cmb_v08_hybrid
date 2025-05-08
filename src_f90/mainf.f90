@@ -415,7 +415,7 @@ subroutine mainfort(jobname, f1ctmi1,f1ctmi2,f1ctmi3,                    &
   PRINT *,'File read status 1CGMI : ',st_1, st_2, st_3
 
 !  SFM  end    12/06/2013  reworked checks for nil and dead files
-
+  call allocate_ge_data(ge_data, 300, 49, 10, 88, 13)
   ifdpr(1:1)='N'
 
 !  SFM  start  12/06/2013
@@ -668,12 +668,16 @@ subroutine do_chunkx(i,ialg, idir)
   real :: dprrain(49,300)
   integer :: nfov, nray, nch1, nch2, nfeat_in, nfeat_out
   real, allocatable :: tb_resampled(:,:,:)
+  real, allocatable :: y_output_oe(:,:,:)
+  integer :: i1,j1,k1, nfeat_oe
   nfov=221
   nray=49
+  nfeat_oe=28
   nch1=9
   nch2=4
-  nfeat_in=19
+  nfeat_in=16
   nfeat_out=12
+
   print*,'ichunk=', i, nMemb, istart
   ic=i*nBSize
   !jobnamec(1)='j'
@@ -809,16 +813,68 @@ subroutine do_chunkx(i,ialg, idir)
        dPRData%n1c21, nray, dPRData%xlon(1:nray,1:dPRData%n1c21), &
        dPRData%xlat(1:nray,1:dPRData%n1c21),&
        tb_resampled(1:dPRData%n1c21,1:nray,nch1+1:nch1+nch2))
+
+!  print*, 'nchan',nch1+nch2
+!  print*, nray, dPRData%n1c21
+  !if(i.eq.16) then
+  !   open(10,file='tb_resampled.ascii',form='unformatted')
+  !   write(10) tb_resampled
+  !   write(10) dPRData%envQv
+  !   write(10) dPRData%envSknTemp
+  !   write(10) dPRData%surfaceType(1:nray,1:dPRData%n1c21)
+     !do k1=1,13
+     !   do j1=1,49
+     !      write(10,100) (tb_resampled(i1,j1,k1),i1=1,300)
+     !   enddo
+     !enddo
+  100 format(300(F7.2,2x))
+  !   print*, shape(dPRData%envQv)
+  !   stop
+  !end if
   !  grid_chunk_tb(istart, iend, nfov, nch, gmi_lon_orig, gmi_lat_orig, tc_orig, &
   !    ndpr, nray, lon_dpr, lat_dpr, tb_resampled)
-  if(i.eq.3) then
-     call test_model_1d_onnx(tb_resampled,dPRData%surfaceType(1:nray,1:dPRData%n1c21),&
-       dPRData%envSknTemp,dPRData%envQv,dPRData%n1c21,nray,nch1+nch2,nbin, nfeat_in, nfeat_out,&
-       dPRData%nn_output)
+  !if(i.eq.16) then
+  !print*, shape(ge_data%GEPrecipTotRate)
+
+  allocate(y_output_oe(dPRData%n1c21,nray,nfeat_oe))
+  
+  call test_model_1d_onnx_f(tb_resampled,dPRData%surfaceType(1:nray,1:dPRData%n1c21),&
+       dPRData%envSknTemp,dPRData%envQv,dPRData%n1c21,nray,nch1+nch2,nbin, &
+       nfeat_out, nfeat_oe,&
+       dPRData%nn_output,ge_data%GEPrecipTotRate(1:dPRData%n1c21,1:nray,1:nbin),&
+       y_output_oe(1:dPRData%n1c21,1:nray,1:nfeat_oe))
+
+  ge_data%GEcolumnWaterVapor(1:dPRData%n1c21,1:nray)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,1)
+  ge_data%GEsurfEmissivity(1:dPRData%n1c21,1:nray,1:13)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,2:14)
+  ge_data%GEskinTemperature(1:dPRData%n1c21,1:nray)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,15)
+  ge_data%GEsurfaceAirTemperature(1:dPRData%n1c21,1:nray)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,16)
+  ge_data%GEsurfaceVaporDensity(1:dPRData%n1c21,1:nray)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,17)
+  ge_data%GEvaporDensity(1:dPRData%n1c21,1:nray,1:10)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,18:27)
+  ge_data%GEtenMeterWindSpeed(1:dPRData%n1c21,1:nray)=&
+       y_output_oe(1:dPRData%n1c21,1:nray,28)
+  !all_sky_scaler_ocean%oe_wvp=(/21.110,19.443/)           !1
+  !all_sky_scaler_ocean%oe_emiss=(/ 0.620, 0.201/)         !14
+  !all_sky_scaler_ocean%oe_sk_temp=(/283.710,13.646/)      !15
+  !all_sky_scaler_ocean%oe_sfc_air_temp=(/283.395,13.393/) !16
+  !all_sky_scaler_ocean%oe_sfc_qv=(/12.592,11.303/)        !17
+  !all_sky_scaler_ocean%oe_vapor_dens=(/ 3.580, 6.081/)    !27
+  !all_sky_scaler_ocean%oe_ws_10m=(/ 8.818, 4.512/)        !28
+  
+  
+!     test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
+!     qv_f,ndpr,nray,nchan,nbin,&
+!     nfeat_in,nfeat_out,x_output_f,precipTotRate)
+  
 !     test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
 !     qv_f,ndpr,nray,nchan,nbin,&
 !     nfeat_in,nfeat_out,x_output_f)
-  endif
+!  endif
 ! test_onnx(tb_resampled,surfaceType_f,skTemp_f,qv_f,ndpr,nray,nchan,nbin,&
 !    nfeat_in,nfeat_out,x_output_f)
   call reSampleGMI(gmiData,iStart,iEnd,gmi2Grid,i)
@@ -850,7 +906,7 @@ subroutine do_chunkx(i,ialg, idir)
   !     dPRRet,gridEnvData, gmi2Grid,        &
   !     gmiData, nmu, nMemb, nmfreq, ngates, sysdn, ic, tbRgrid, dprrain, &
   !     i, st_2adpr,orbitNumber,iStart,iEnd)
-  
+  deallocate(y_output_oe)
   
   deallocate(tb_resampled)
   ! iStart=iEnd       SFM  04/16/2014   for M.Grecu; node processing

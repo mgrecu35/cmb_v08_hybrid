@@ -43,6 +43,8 @@ CC_SWITCH  = IFORT
 #HDF5_INC=/PANFS/local/HDF5/include/
 #HDF5_LIB=/PANFS/local/HDF5/lib
 #TKIO=/PANFS/user/home/tkio/tkio-3.97.13
+ONNXRUNTIME_LIB = ./onnxruntime/lib
+ONNXRUNTIME_INC = onnxruntime/include/
 #---Required include files
 INC=    -I$(HDF5_INC) -I$(NETCDF_INC) \
 	-Iflann/include/\
@@ -54,7 +56,7 @@ INC=    -I$(HDF5_INC) -I$(NETCDF_INC) \
 LIB =	-L$(HDF5_LIB) -L$(NETCDF_LIB) \
 	-L$(TKIO)/lib \
 	-Llapack-3.4.1\
-	-Lflann/lib -Lmultiscatter-1.2.10/lib  -L./npy_array -L/PANFS/user/home/mgrecu/data/miniforge3/lib -L./onnxruntime/lib -L./fortran-kdtree/build/
+	-Lflann/lib -Lmultiscatter-1.2.10/lib  -L./npy_array -L/PANFS/user/home/mgrecu/data/miniforge3/lib -L$(ONNXRUNTIME_LIB) -L./fortran-kdtree/build/
 
 
 #---List of Normal Libraires to Search for References during Linkage
@@ -66,7 +68,7 @@ LIBES = -ltkcselect  \
 
 
 #---Compile Stages
-OBJ =	    main.o f90DataTypes.o  random.o writegif.o nbin.o\
+OBJ =	    main.o f90DataTypes.o ge_data_module.o random.o writegif.o nbin.o\
     weightModule.o \
     missing_flags.o read_melt_percentages.o\
     globModule.o inputParser.o readTables_nonsph.o\
@@ -94,7 +96,7 @@ OBJ =	    main.o f90DataTypes.o  random.o writegif.o nbin.o\
     rteModule.o getScattProp.o armadillo_funcs.o cmbAlg.o\
     writeCMBOut_TK_FS.o  writeCMBOut_TK.o writeCMBTOut_TK.o writeCMBOut_TK_T.o\
     clutterCorrection_bzd.o oe_output_kugmi.o check_nan.o oe_output_kutmi.o \
-    onnx_gen_interface.o scaler_def.o onnx_interface.o 
+    onnx_gen_interface.o scaler_def.o all_sky_scaler_1d.o onnx_interface.o  tb_grid.o test_onnx.o ge_to_swath.o
 #onnx_bridge.o\
 #    fortran_getter.o onnx_f90_interface.o  retrieval_model_onnx.o 
 
@@ -158,6 +160,9 @@ atm_routines.o: src_sjm/atm_routines.f90
 read_melt_percentages.o:        src_f90/read_melt_percentages.f90
 		$(F90) -c -O2 src_f90/read_melt_percentages.f90
 
+tb_grid.o:        src_f90/tb_grid.f90
+		$(F90) -I fortran-kdtree/build -c -O2 src_f90/tb_grid.f90
+
 interp_melt_percentages.o:      MeltFrac/interp_melt_percentages.f90
 		$(F90) -c -O2 MeltFrac/interp_melt_percentages.f90
 
@@ -165,7 +170,10 @@ sst.rend.o:     src_f90/sst.rend.f90 src_f90/f90DataTypes.f90
 		$(F90) -c  -O2 src_f90/sst.rend.f90 
 
 f90DataTypes.o:	src_f90/f90DataTypes.f90 
-		$(F90) -c  -O2 src_f90/f90DataTypes.f90 
+		$(F90) -c  -O2 src_f90/f90DataTypes.f90
+
+ge_data_module.o:	src_f90/ge_data_module.f90 
+		$(F90) -c  -O2 src_f90/ge_data_module.f90 
 
 f90Types.o:	src_f90/f90Types.f90 
 		$(F90) -c  -O2 src_f90/f90Types.f90 
@@ -218,17 +226,23 @@ scaler_def.o:	src_f90/scaler_def.f90
 readNh.o:	src_c/readNh.c
 		$(CC) -c -O2 src_c/readNh.c
 
-onnx_bridge.o:  src_c/onnx_bridge.c
-		$(CC) -I npy_array -I/PANFS/user/home/mgrecu/data/miniforge3/include -c -O2 src_c/onnx_bridge.c
+#onnx_bridge.o:  src_c/onnx_bridge.c
+#		$(CC) -I npy_array -I/PANFS/user/home/mgrecu/data/miniforge3/include -c -O2 src_c/onnx_bridge.c
 
-onnx_gen_interface.o: src_c/onnx_gen_interface.c
-		$(CC) -I src_c -I onnxruntime/include/ -I/PANFS/user/home/mgrecu/data/miniforge3/include -c -O2 src_c/onnx_gen_interface.c
+onnx_gen_interface.o: src_c/onnx_gen_interface.c src_c/model_details.h
+		$(CC) -I src_c -I$(ONNXRUNTIME_INC) -I/PANFS/user/home/mgrecu/data/miniforge3/include -c -O2 src_c/onnx_gen_interface.c
 		
 onnx_f90_interface.o: onnx-runtime-src/onnx_f90_interface.f90
 		      $(F90) -c -fPIC onnx-runtime-src/onnx_f90_interface.f90
 
+all_sky_scaler_1d.o: src_f90/all_sky_scaler_1d.f90
+		      $(F90) -c -fPIC src_f90/all_sky_scaler_1d.f90
+		      
 onnx_interface.o: src_f90/onnx_interface.f90
 		      $(F90) -c -fPIC src_f90/onnx_interface.f90
+
+test_onnx.o: src_f90/test_onnx.f90
+		      $(F90) -c -fPIC src_f90/test_onnx.f90
 
 retrieval_model_onnx.o: onnx-runtime-src/retrieval_model_onnx.c
 			$(CC) -c -fPIC -I./onnxruntime/include onnx-runtime-src/retrieval_model_onnx.c
@@ -300,7 +314,7 @@ radarRet.Empty.o:	src_f90/radarRet.Empty.f90
 convPix.o:	convPix.f90 
 		$(F90) -c  -O2 convPix.f90 
 
-globModule.o:	src_f90/globModule.f90 
+globModule.o:	src_f90/globModule.f90 ge_data_module.o
 		$(F90) -c  -O2 src_f90/globModule.f90 
 
 writeCMB.rend.o:	writeCMB.rend.c 
@@ -536,6 +550,9 @@ writeCMBT300Out_TK.o:	src_c/writeCMBT300Out_TK.c
 
 writeCMBOut_TK_FS.o:	src_c/writeCMBOut_TK_FS.c
 		$(CC) -c -g -D$(CPP_SWITCH) -O2 $(INC) src_c/writeCMBOut_TK_FS.c
+
+ge_to_swath.o:	src_c/ge_to_swath.c
+		$(CC) -c -g -D$(CPP_SWITCH) -O2 $(INC) src_c/ge_to_swath.c
 
 writeCMBOut_TK_T.o:     src_c/writeCMBOut_TK_T.c
 		$(CC) -c -g -D$(CPP_SWITCH) -O2 $(INC) src_c/writeCMBOut_TK_T.c

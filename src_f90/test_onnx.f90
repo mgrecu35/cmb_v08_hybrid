@@ -131,7 +131,7 @@ subroutine test_onnx(tb_resampled,surfaceType_f,skTemp_f,qv_f,ndpr,nray,nchan,nb
     integer :: istart, ioffset2, nfeat_in, nfeat_out, n_inp, n_calls, isurf
     real :: x_output(ndpr,nray,nfeat_out)
     real :: x_output_f(nfeat_out,nray,ndpr)
-
+    real :: x_output_1d(62)
     n_inp=32
     !nfeat_in=19
     !nfeat_out=12
@@ -217,8 +217,9 @@ end subroutine test_onnx
 
 subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
      qv_f,ndpr,nray,nchan,nbin,&
-     nfeat_in,nfeat_out,x_output_f)
+     nfeat_in,nfeat_out,x_output_f,precipTotRate)
     use scalers
+    !use ge_module 
     implicit none
     integer :: ndpr, nray, nbin, nchan
     real :: tb_resampled(ndpr,nray,nchan)
@@ -228,13 +229,101 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
     integer :: surfaceType(ndpr,nray)
     real :: skTemp(ndpr,nray)
     real :: qv(ndpr,nray,nbin)
-    real :: azimuthAngle(25)
-    real :: x_input(ndpr,49,19)
     integer :: itype, n150, i, j, ichunk, icount, patch_type(ndpr)
     real :: x_qv_enc(4)
     integer :: istart, ioffset2, nfeat_in, nfeat_out, n_inp, n_calls, isurf
-    real :: x_input_1d(16), x_output_1d(8)
-    real :: x_output_f(nfeat_out,nray,ndpr)
+    real :: x_input_1d(16), x_output_1d(8), x_output_prof_1d(62)
+    real,intent(out) :: x_output_f(nfeat_out,nray,ndpr)
+    !real,intent(out) :: x_output_prof(ndpr,nray,88)
+    integer :: model_index, input_index, output_index
+    !type(ge_data_type) :: ge_data
+    real :: precipTotRate(300,49,88)
+    do i=1,ndpr
+        do j=1,nray
+            surfaceType(i,j)=surfaceType_f(j,i)
+            skTemp(i,j)=skTemp_f(j,i)
+            qv(i,j,1:nbin)=qv_f(1:nbin,j,i)
+        end do
+    end do
+
+    do i=1,ndpr
+       do j=1,nray
+          if(surfaceType(i,j)<1) then
+             isurf=0
+             model_index=9
+          else
+             isurf=1
+             model_index=8
+          end if
+          !X_input=torch.tensor(np.concatenate((tc_scaled,sfc_type_scaled[:,np.newaxis],sk_temp_scaled[:,np.newaxis],qv_scaled[:,np.newaxis]),axis=-1),dtype=torch.float32)
+
+          if(isurf==1) then
+             x_input_1d(1:13)=(tb_resampled(i,j,1:13)-scaler_1d_land%tc_mean)/&
+                  scaler_1d_land%tc_std
+             x_input_1d(14)=(surfaceType(i,j)-scaler_1d_land%sfc_type_mean)/&
+                  scaler_1d_land%sfc_type_std
+             x_input_1d(15)=(skTemp(i,j)-scaler_1d_land%sk_temp_mean)/&
+                  scaler_1d_land%sk_temp_std
+             x_input_1d(16)=(qv(i,j,10)-scaler_1d_land%qv_mean)/&
+                  scaler_1d_land%qv_std
+          else
+             x_input_1d(1:13)=(tb_resampled(i,j,1:13)-scaler_1d_ocean%tc_mean)/&
+                  scaler_1d_ocean%tc_std
+             x_input_1d(14)=(surfaceType(i,j)-scaler_1d_ocean%sfc_type_mean)/&
+                  scaler_1d_ocean%sfc_type_std
+             x_input_1d(15)=(skTemp(i,j)-scaler_1d_ocean%sk_temp_mean)/&
+                  scaler_1d_ocean%sk_temp_std
+             x_input_1d(16)=(qv(i,j,10)-scaler_1d_ocean%qv_mean)/&
+                  scaler_1d_ocean%qv_std
+          endif
+          input_index=0
+          output_index=0
+          call set_input_data(model_index, input_index, x_input_1d)
+          call call_onnx(model_index)
+          call get_output_data(model_index, output_index, x_output_1d)
+          model_index=model_index-2
+          call set_input_data(model_index, input_index, x_input_1d)
+          call call_onnx(model_index)
+          call get_output_data(model_index, output_index, x_output_prof_1d)
+          x_output_prof_1d=x_output_prof_1d*0.5+0.8
+          x_output_prof_1d=0.1*(10**x_output_prof_1d-1)
+          if(isurf==1) then
+             x_output_1d(2)=x_output_1d(2)*scaler_1d_land%near_sfc_precip_std+&
+                  scaler_1d_land%near_sfc_precip_mean
+             precipTotRate(i,j,21:82)=x_output_prof_1d(1:62)
+          else
+             x_output_1d(2)=x_output_1d(2)*scaler_1d_ocean%near_sfc_precip_std+&
+                  scaler_1d_ocean%near_sfc_precip_mean
+             precipTotRate(i,j,23:84)=x_output_prof_1d(1:62)
+          endif
+          x_output_f(2,j,i)=0.1*(10**x_output_1d(2)-1)
+        end do
+    end do
+
+end subroutine test_model_1d_onnx
+
+
+subroutine test_model_1d_onnx_f(tb_resampled,surfaceType_f,skTemp_f,&
+     qv_f,ndpr,nray,nchan,nbin,&
+     nfeat_out,nfeat_oe,x_output_f,x_output_prof, x_output_oe)
+     use scalers
+     use sky_scalers
+    implicit none
+    integer :: ndpr, nray, nbin, nchan
+    real :: tb_resampled(ndpr,nray,nchan)
+    integer :: surfaceType_f(nray,ndpr)
+    real :: skTemp_f(nray,ndpr)
+    real :: qv_f(nbin,nray,ndpr)
+    integer :: surfaceType(ndpr,nray)
+    real :: skTemp(ndpr,nray)
+    real :: qv(ndpr,nray,nbin)
+    integer :: i, j, ichunk, icount, patch_type(ndpr)
+
+    integer :: nfeat_oe, nfeat_out, n_inp, n_calls, isurf
+    real :: x_input_1d(16), x_output_1d(8), x_output_prof_1d(62)
+    real,intent(out) :: x_output_f(nfeat_out,nray,ndpr)
+    real,intent(out) :: x_output_prof(ndpr,nray,88)
+    real,intent(out) :: x_output_oe(ndpr,nray,nfeat_oe)
     integer :: model_index, input_index, output_index
    
     do i=1,ndpr
@@ -254,7 +343,8 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
              isurf=1
              model_index=8
           end if
-          
+          !X_input=torch.tensor(np.concatenate((tc_scaled,sfc_type_scaled[:,np.newaxis],sk_temp_scaled[:,np.newaxis],qv_scaled[:,np.newaxis]),axis=-1),dtype=torch.float32)
+
           if(isurf==1) then
              x_input_1d(1:13)=(tb_resampled(i,j,1:13)-scaler_1d_land%tc_mean)/&
                   scaler_1d_land%tc_std
@@ -262,8 +352,9 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
                   scaler_1d_land%sfc_type_std
              x_input_1d(15)=(skTemp(i,j)-scaler_1d_land%sk_temp_mean)/&
                   scaler_1d_land%sk_temp_std
-             x_input_1d(16)=(qv(i,j,78)-scaler_1d_land%qv_mean)/&
+             x_input_1d(16)=(qv(i,j,82)-scaler_1d_land%qv_mean)/&
                   scaler_1d_land%qv_std
+             !print*, s
           else
              x_input_1d(1:13)=(tb_resampled(i,j,1:13)-scaler_1d_ocean%tc_mean)/&
                   scaler_1d_ocean%tc_std
@@ -271,7 +362,7 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
                   scaler_1d_ocean%sfc_type_std
              x_input_1d(15)=(skTemp(i,j)-scaler_1d_ocean%sk_temp_mean)/&
                   scaler_1d_ocean%sk_temp_std
-             x_input_1d(16)=(qv(i,j,78)-scaler_1d_ocean%qv_mean)/&
+             x_input_1d(16)=(qv(i,j,82)-scaler_1d_ocean%qv_mean)/&
                   scaler_1d_ocean%qv_std
           endif
           input_index=0
@@ -279,15 +370,87 @@ subroutine test_model_1d_onnx(tb_resampled,surfaceType_f,skTemp_f,&
           call set_input_data(model_index, input_index, x_input_1d)
           call call_onnx(model_index)
           call get_output_data(model_index, output_index, x_output_1d)
+          model_index=model_index-2
+          call set_input_data(model_index, input_index, x_input_1d)
+          call call_onnx(model_index)
+          call get_output_data(model_index, output_index, x_output_prof_1d)
+          x_output_prof_1d=x_output_prof_1d*0.5+0.8
+          x_output_prof_1d=0.1*(10**x_output_prof_1d-1)
           if(isurf==1) then
              x_output_1d(2)=x_output_1d(2)*scaler_1d_land%near_sfc_precip_std+&
                   scaler_1d_land%near_sfc_precip_mean
+             x_output_prof(i,j,21:82)=x_output_prof_1d(1:62)
           else
              x_output_1d(2)=x_output_1d(2)*scaler_1d_ocean%near_sfc_precip_std+&
                   scaler_1d_ocean%near_sfc_precip_mean
+             x_output_prof(i,j,23:84)=x_output_prof_1d(1:62)
           endif
           x_output_f(2,j,i)=0.1*(10**x_output_1d(2)-1)
+          if(x_output_f(2,j,i).lt.0.02) then
+            x_output_f(2,j,i)=0.0
+            if(isurf==1) then
+               x_output_prof(i,j,21:82)=0.00
+            else
+               x_output_prof(i,j,23:84)=0.00
+            endif   
+          else
+            if(isurf==1) then
+                x_output_prof(i,j,21:82)=x_output_prof(i,j,21:82)*x_output_f(2,j,i)/(max(x_output_prof(i,j,82),0.0001))
+             else
+                x_output_prof(i,j,23:84)=x_output_prof(i,j,23:84)*x_output_f(2,j,i)/(max(x_output_prof(i,j,84),0.0001))
+             endif 
+          endif
+          if(surfaceType(i,j)<1) then
+            isurf=0
+            model_index=1
+          else
+            isurf=1
+            model_index=0
+         end if
+         input_index=0
+         output_index=0
+         call set_input_data(model_index, input_index, x_input_1d)
+         call call_onnx(model_index)
+         call get_output_data(model_index, output_index, x_output_oe(i,j,:))
+         !all_sky_scaler_ocean%oe_wvp=(/21.110,19.443/)           !1
+         !all_sky_scaler_ocean%oe_emiss=(/ 0.620, 0.201/)         !14
+         !all_sky_scaler_ocean%oe_sk_temp=(/283.710,13.646/)      !15
+         !all_sky_scaler_ocean%oe_sfc_air_temp=(/283.395,13.393/) !16
+         !all_sky_scaler_ocean%oe_sfc_qv=(/12.592,11.303/)        !17
+         !all_sky_scaler_ocean%oe_vapor_dens=(/ 3.580, 6.081/)    !27
+         !all_sky_scaler_ocean%oe_ws_10m=(/ 8.818, 4.512/)        !28
+         if (isurf.eq.1) then
+            x_output_oe(i,j,1)=x_output_oe(i,j,1)*all_sky_scaler_land%oe_wvp(2)+&
+                 all_sky_scaler_land%oe_wvp(1)
+            x_output_oe(i,j,2:14)=x_output_oe(i,j,2:14)*all_sky_scaler_land%oe_emiss(2)+&
+                 all_sky_scaler_land%oe_emiss(1)
+            x_output_oe(i,j,15)=x_output_oe(i,j,15)*all_sky_scaler_land%oe_sk_temp(2)+&
+                 all_sky_scaler_land%oe_sk_temp(1)
+            x_output_oe(i,j,16)=x_output_oe(i,j,16)*all_sky_scaler_land%oe_sfc_air_temp(2)+&
+                 all_sky_scaler_land%oe_sfc_air_temp(1)
+            x_output_oe(i,j,17)=x_output_oe(i,j,17)*all_sky_scaler_land%oe_sfc_qv(2)+&
+                 all_sky_scaler_land%oe_sfc_qv(1)
+            x_output_oe(i,j,18:27)=x_output_oe(i,j,18:27)*all_sky_scaler_land%oe_vapor_dens(2)+&
+                 all_sky_scaler_land%oe_vapor_dens(1)
+            x_output_oe(i,j,28)=x_output_oe(i,j,28)*all_sky_scaler_land%oe_ws_10m(2)+&
+                 all_sky_scaler_land%oe_ws_10m(1)
+         else
+            x_output_oe(i,j,1)=x_output_oe(i,j,1)*all_sky_scaler_ocean%oe_wvp(2)+&
+                 all_sky_scaler_ocean%oe_wvp(1)
+            x_output_oe(i,j,2:14)=x_output_oe(i,j,2:14)*all_sky_scaler_ocean%oe_emiss(2)+&
+                 all_sky_scaler_ocean%oe_emiss(1)
+            x_output_oe(i,j,15)=x_output_oe(i,j,15)*all_sky_scaler_ocean%oe_sk_temp(2)+&
+                 all_sky_scaler_ocean%oe_sk_temp(1)
+            x_output_oe(i,j,16)=x_output_oe(i,j,16)*all_sky_scaler_ocean%oe_sfc_air_temp(2)+&
+                 all_sky_scaler_ocean%oe_sfc_air_temp(1)
+            x_output_oe(i,j,17)=x_output_oe(i,j,17)*all_sky_scaler_ocean%oe_sfc_qv(2)+&
+                 all_sky_scaler_ocean%oe_sfc_qv(1)
+            x_output_oe(i,j,18:27)=x_output_oe(i,j,18:27)*all_sky_scaler_ocean%oe_vapor_dens(2)+&
+                 all_sky_scaler_ocean%oe_vapor_dens(1)
+            x_output_oe(i,j,28)=x_output_oe(i,j,28)*all_sky_scaler_ocean%oe_ws_10m(2)+&
+                 all_sky_scaler_ocean%oe_ws_10m(1)
+         endif
         end do
     end do
 
-end subroutine test_model_1d_onnx
+end subroutine test_model_1d_onnx_f

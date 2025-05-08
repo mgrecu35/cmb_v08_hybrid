@@ -1190,6 +1190,7 @@ do j=1,dPRData%n1c21
          call copypwcs1_fs(pwc3D(:,i,j),pwc3Dstd(:,i,j),i-1)
          call copy_tot_to_liqrate_ku(i-1, rrate3D(:,i,j), dPRData%node(:,i,j))
          call copy_tot_to_liqwatercont_ku(i-1, pwc3D(:,i,j), dPRData%node(:,i,j))
+         
          call copylwcfracs1_fs(mlwc_frac(:,i,j),mrate_frac(:,i,j),i-1)
          if(sfcRain(i,j).ge.-0.001) then
             call copysfcrainliqfracs1_fs(sfcRain(i,j)*sfcRainLiqFrac(i, j), i-1)
@@ -1205,6 +1206,16 @@ do j=1,dPRData%n1c21
               sfcRain(i,j), dprData%binRealSurface(i,j), &
               dprData%binZeroDegree(i,j), dprData%binClutterFree(i,j),&
               pType(j,i),sfcRainLiqFrac(i, j),dprData%badRayFlag(i,j))
+         !------- ge 3d variables-----------!
+         call copy_gepreciptotrate(ge_data%GEprecipTotRate(j,i,:), i-1, 88)
+         call copy_gevapordensity(ge_data%GEvaporDensity(j,i,:), i-1, 10)
+         call copy_gesurfemissivity(ge_data%GEsurfEmissivity(j,i,:), i-1, 13)
+         !--------ge 2d variables-----------!
+         call copy_geskintemperature(ge_data%GEskinTemperature(j,i),i-1)
+         call copy_gesurfaceairtemperature(ge_data%GEsurfaceAirTemperature(j,i),i-1)
+         call copy_gecolumnwatervapor(ge_data%GEcolumnWaterVapor(j,i),i-1)
+         call copy_gesurfacevapordensity(ge_data%GEsurfaceVaporDensity(j,i),i-1)
+         call copy_getenmeterwindspeed(ge_data%GEtenMeterWindSpeed(j,i),i-1)
       endif
          
 !begin  WSO 8/19/13 change dNw to Nw and add mu
