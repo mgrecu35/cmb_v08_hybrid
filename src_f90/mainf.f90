@@ -659,6 +659,7 @@ end subroutine getzs
 
 subroutine do_chunkx(i,ialg, idir)
   use globalData
+  use missingMod
   implicit none
 
   integer :: i, ialg
@@ -672,7 +673,7 @@ subroutine do_chunkx(i,ialg, idir)
   integer :: i1,j1,k1, nfeat_oe
   nfov=221
   nray=49
-  nfeat_oe=28
+  nfeat_oe=38
   nch1=9
   nch2=4
   nfeat_in=16
@@ -837,6 +838,31 @@ subroutine do_chunkx(i,ialg, idir)
   !print*, shape(ge_data%GEPrecipTotRate)
 
   allocate(y_output_oe(dPRData%n1c21,nray,nfeat_oe))
+
+  !ge_data%GEprecipFlag=
+  !ge_data%GEprecipType=
+  !ge_data%GEsurfaceClass=
+  ge_data%GEairTemperature=missing_r4
+  ge_data%GEvaporDensity=missing_r4
+  ge_data%GEcolumnWaterVapor=missing_r4
+  ge_data%GEcloudLiqWaterCont=missing_r4
+  ge_data%GEcolumnCloudLiqWater=missing_r4
+  ge_data%GEskinTemperature=missing_r4
+  ge_data%GEsurfaceAirTemperature=missing_r4
+  ge_data%GEsurfaceVaporDensity=missing_r4
+  ge_data%GEtenMeterWindSpeed=missing_r4
+  ge_data%GEsurfEmissivity=missing_r4
+  ge_data%GEprecipTotWaterCont=missing_r4
+  ge_data%GEprecipTotWaterContSigma=missing_r4
+  ge_data%GEprecipLiqWaterCont=missing_r4
+  ge_data%GEprecipTotRate=missing_r4
+  ge_data%GEprecipTotRateSigma=missing_r4
+  ge_data%GEprecipLiqRate=missing_r4
+  ge_data%GEestimSurfPrecipTotRate=missing_r4
+  ge_data%GEestimSurfPrecipTotRateSigma=missing_r4
+  ge_data%GEestimSurfPrecipLiqRate=missing_r4
+  ge_data%GEpia=missing_r4
+  ge_data%GEsimulatedBrightTemp=missing_r4
   
   call test_model_1d_onnx_f(tb_resampled,dPRData%surfaceType(1:nray,1:dPRData%n1c21),&
        dPRData%envSknTemp,dPRData%envQv,dPRData%n1c21,nray,nch1+nch2,nbin, &

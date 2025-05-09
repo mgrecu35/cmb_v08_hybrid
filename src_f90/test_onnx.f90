@@ -308,6 +308,7 @@ subroutine test_model_1d_onnx_f(tb_resampled,surfaceType_f,skTemp_f,&
      nfeat_out,nfeat_oe,x_output_f,x_output_prof, x_output_oe)
      use scalers
      use sky_scalers
+     use missingMod
     implicit none
     integer :: ndpr, nray, nbin, nchan
     real :: tb_resampled(ndpr,nray,nchan)
@@ -434,6 +435,9 @@ subroutine test_model_1d_onnx_f(tb_resampled,surfaceType_f,skTemp_f,&
                  all_sky_scaler_land%oe_vapor_dens(1)
             x_output_oe(i,j,28)=x_output_oe(i,j,28)*all_sky_scaler_land%oe_ws_10m(2)+&
                  all_sky_scaler_land%oe_ws_10m(1)
+            x_output_oe(i,j,29:38)=x_output_oe(i,j,29:38)*all_sky_scaler_land%oe_air_temp(2)+&
+                 all_sky_scaler_land%oe_air_temp(1)
+            x_output_oe(i,j,28)=missing_r4
          else
             x_output_oe(i,j,1)=x_output_oe(i,j,1)*all_sky_scaler_ocean%oe_wvp(2)+&
                  all_sky_scaler_ocean%oe_wvp(1)
@@ -449,6 +453,8 @@ subroutine test_model_1d_onnx_f(tb_resampled,surfaceType_f,skTemp_f,&
                  all_sky_scaler_ocean%oe_vapor_dens(1)
             x_output_oe(i,j,28)=x_output_oe(i,j,28)*all_sky_scaler_ocean%oe_ws_10m(2)+&
                  all_sky_scaler_ocean%oe_ws_10m(1)
+            x_output_oe(i,j,29:38)=x_output_oe(i,j,29:38)*all_sky_scaler_ocean%oe_air_temp(2)+&
+                 all_sky_scaler_ocean%oe_air_temp(1)
          endif
         end do
     end do

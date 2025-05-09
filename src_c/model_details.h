@@ -1,5 +1,5 @@
 void models_details_c_(){
-strcpy(models[0].model_path,"GMI-models/all_sky_dense_model_land.onnx");
+strcpy(models[0].model_path,"GMI-models/all_sky_dense_model_prec_land.onnx");
 printf("model[0] =%s \n",models[0].model_path);
 strcpy(models[0].inputs[0].name,"input");
 models[0].inputs[0].shape_len=2;
@@ -14,10 +14,10 @@ strcpy(models[0].outputs[0].name,"output");
 models[0].outputs[0].shape_len=2;
 models[0].outputs[0].n_elem=28;
 models[0].outputs[0].shape[0]=1;
-models[0].outputs[0].shape[1]=28;
+models[0].outputs[0].shape[1]=38;
 models[0].outputs[0].dtype=1;
 models[0].output_data[0]=(float *) malloc(sizeof(float)*28);
-strcpy(models[1].model_path,"GMI-models/all_sky_dense_model_ocean.onnx");
+strcpy(models[1].model_path,"GMI-models/all_sky_dense_model_prec_ocean.onnx");
 printf("model[1] =%s \n",models[1].model_path);
 strcpy(models[1].inputs[0].name,"input");
 models[1].inputs[0].shape_len=2;
@@ -32,7 +32,7 @@ strcpy(models[1].outputs[0].name,"output");
 models[1].outputs[0].shape_len=2;
 models[1].outputs[0].n_elem=28;
 models[1].outputs[0].shape[0]=1;
-models[1].outputs[0].shape[1]=28;
+models[1].outputs[0].shape[1]=38;
 models[1].outputs[0].dtype=1;
 models[1].output_data[0]=(float *) malloc(sizeof(float)*28);
 strcpy(models[2].model_path,"GMI-models/dense_decoder_land.onnx");
