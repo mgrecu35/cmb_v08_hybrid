@@ -96,7 +96,7 @@ OBJ =	    main.o f90DataTypes.o ge_data_module.o random.o writegif.o nbin.o\
     rteModule.o getScattProp.o armadillo_funcs.o cmbAlg.o\
     writeCMBOut_TK_FS.o  writeCMBOut_TK.o writeCMBTOut_TK.o writeCMBOut_TK_T.o\
     clutterCorrection_bzd.o oe_output_kugmi.o check_nan.o oe_output_kutmi.o \
-    onnx_gen_interface.o scaler_def.o all_sky_scaler_1d.o onnx_interface.o  tb_grid.o test_onnx.o ge_to_swath.o
+    onnx_gen_interface.o scaler_def.o all_sky_scaler_1d.o onnx_interface.o  tb_grid.o test_onnx.o ge_to_swath.o fortran_alignment.o
 #onnx_bridge.o\
 #    fortran_getter.o onnx_f90_interface.o  retrieval_model_onnx.o 
 
@@ -128,7 +128,8 @@ gmi_ocean_ret_raob.o: src_sjm/gmi_ocean_ret_raob.f90 lut_routines_sjm.o constant
 		$(F90) -c  -O2 -qopenmp src_sjm/gmi_ocean_ret_raob.f90 
 		
 gmi_land_ret_raob.o: src_sjm/gmi_land_ret_raob.f90 lut_routines_sjm.o constants_sjm.inc algebra.o fmodel.o rtm_emission_planck_monortm.o oe_routines.o calcPIA.o atm_routines.o normal.o
-		$(F90) -c  -O2 -qopenmp src_sjm/gmi_land_ret_raob.f90 
+		$(F90) -c  -O2 -qopenmp src_sjm/gmi_land_ret_raob.f90
+
 		
 algebra.o: src_sjm/algebra.f90
 		$(F90) -c  -O2 -qopenmp src_sjm/algebra.f90 
@@ -204,6 +205,9 @@ gEnv.qvcorr.o:		src_f90/gEnv.qvcorr.f90
 
 pia35fromTbs.o:	pia35fromTbs.f
 		$(F90) -c  -O2 pia35fromTbs.f
+
+fortran_alignment.o:	src_f90/fortran_alignment.f90
+		$(F90) -c  -O2 src_f90/fortran_alignment.f90
 
 clearSky.Ocean.o:	clearSky.Ocean.f
 		$(F90) -c  -O2 clearSky.Ocean.f

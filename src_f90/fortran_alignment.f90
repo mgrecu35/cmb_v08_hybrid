@@ -42,13 +42,14 @@ subroutine gaussian_filter(input, output, n, sigma)
     end do
 end subroutine gaussian_filter
 
-subroutine align_precip(precip_gmi_only, precip_corra, precip_gmi_only_shifted, n_size, n_ray)
+subroutine align_precip(precip_gmi_only, precip_corra, precip_gmi_only_shifted, filt_displacement,&
+     n_size, n_ray)
     implicit none
     integer :: nw2, nmax, n_size, i, j, index, n_ray
     real :: precip_gmi_only(n_size,n_ray), precip_corra(n_size,n_ray)
     real, allocatable :: corr(:)
     integer, allocatable :: displacement(:)
-    real, allocatable :: inv_displacement(:)
+    real, intent(out) :: filt_displacement(n_size)
     real, intent(out) :: precip_gmi_only_shifted(n_size,n_ray)
     integer :: sigma
     integer :: max_index
@@ -57,7 +58,7 @@ subroutine align_precip(precip_gmi_only, precip_corra, precip_gmi_only_shifted, 
     nmax = 4
 
     allocate(displacement(n_size))
-    allocate(inv_displacement(n_size))
+    !allocate(filt_displacement(n_size))
     !allocate(act_corr(0))
     !allocate(index_L(0, 2))
     allocate(corr(2 * nmax + 1))
@@ -83,14 +84,16 @@ subroutine align_precip(precip_gmi_only, precip_corra, precip_gmi_only_shifted, 
 
 ! Apply Gaussian filter (placeholder for actual implementation)
     sigma = 1
-    call gaussian_filter(displacement, inv_displacement, n_size, sigma)
+    call gaussian_filter(displacement, filt_displacement, n_size, sigma)
 
 ! Shift precip_gmi_only
     do i = 1, size(precip_gmi_only, 1)
         do j = 1, size(precip_gmi_only, 2)
-            if (i + inv_displacement(i) > 0 .and. i + inv_displacement(i) <= size(precip_gmi_only, 1)) then
-                precip_gmi_only_shifted(i, j) = precip_gmi_only(int(i + inv_displacement(i)), j)
+            if (i + filt_displacement(i) > 0 .and. i + filt_displacement(i) <= size(precip_gmi_only, 1)) then
+                precip_gmi_only_shifted(i, j) = precip_gmi_only(int(i + filt_displacement(i)), j)
             end if
         end do
-    end do
+     end do
+     deallocate(displacement)
+     !deallocate(corr)
 end subroutine align_precip

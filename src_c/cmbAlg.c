@@ -13,7 +13,8 @@ void radarretsub4_(int *nmu2,  int *nmfreq2,   int *icL, float *tbRgrid,
 		   float *dprrain, int *ichunk, int *orbNumb, int *ialg, int *idir, int *nscans_c);
 void radarretsub4_fs_(int *nmu2,  int *nmfreq2,   int *icL, float *tbRgrid,  
 		      float *dprrain, int *ichunk, int *orbNumb, int *ialg, int *idir,
-		      int *nscans_c);
+		      int *nscans_c, float *precip_thresh);
+void gmiretsub_(int *icL, int *i, int *orbNumb, int *ialg, int *idir, int *st_GMITMI2_c);
 void dealloc_struct_(int *i);
 void close_files_(int *i);
 void rewindc_(int *ic);
@@ -26,6 +27,7 @@ int st_GMITMI2_c;
 void init_onnx_runtime_(void);
 void init_onnx_(void);
 void read_scaler_data_(void);
+void models_details_c_(void);
 int main(int argc, char *argv[])
 {
   char  fname[100];
@@ -33,6 +35,7 @@ int main(int argc, char *argv[])
   int ifs;
 //begin 2/9/22 WSO declare external variable in main
   extern int st_GMITMI2_c;
+  float precip_thresh=0.02;
 //  end 2/9/22
   if(argc != 3)
     {fprintf(stderr, 
@@ -40,10 +43,14 @@ int main(int argc, char *argv[])
       exit(1);}
   
   strcpy(jobname, argv[1]);
+  //models_details_c_();
   init_onnx_(); /*init onnx */
+  
   read_scaler_data_();/*read scalers*/
+  //exit(0);
   strcpy(&fname[0],argv[2]);
   printf("%s \n",&fname[0]);
+  //exit(0);
   int ialg;
   int ndpr=mainj(1,fname,&ifs,&jobname[0],&ialg);
   printf("Back from mainj() %i %i\n",ndpr,ialg);
@@ -64,7 +71,7 @@ int main(int argc, char *argv[])
   int idir;
   int icL;
   int nchunk=ndpr/300;
-  nchunk=2;
+  nchunk=17;
   printf("nchunk = %d\n",nchunk);
   printf("init done \n");
   //exit(0);
@@ -81,7 +88,7 @@ int main(int argc, char *argv[])
 	  else
 	    do_chunk_(&i,&one,&idir);
 	  icL=i*300;
-	  //if(i==26)
+	  if(i==16)
 	    {
 //begin 2/9/22 WSO pass GMI/TMI granule status to OE
 	      printf("GMIretsub\n");
@@ -98,7 +105,7 @@ int main(int argc, char *argv[])
 		  int nscans_c;
 		  printf("Calling radarretsub4_fs() \n");
 		  radarretsub4_fs_(&nmu,  &nmfreq,   &icL, tbRgrid,  
-				   dprrain, &i, &orbNumb, &ialg, &idir, &nscans_c);
+				   dprrain, &i, &orbNumb, &ialg, &idir, &nscans_c, &precip_thresh);
 		  int j=0;
 		  /*for(j=0;j<nscans_c;j++)
 		    writescan_fs_300_(&j);*/

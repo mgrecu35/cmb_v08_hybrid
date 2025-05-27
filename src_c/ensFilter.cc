@@ -362,6 +362,8 @@ void avgScProp(float *sfc_wind,float *umu,float *kext,
  
 }
 
+extern "C" void get_dm_from_zku_(float *zku, float *dnw, float *dm);
+extern "C" void get_dnw_from_dm_(float *zku,float *dnw,float *dm); 
 
 extern "C" void ensradretstcvku_( radarDataType   *radarData, 
 				  stormStructType *stormStruct,
@@ -646,6 +648,12 @@ extern "C" void ensradretstcvku_( radarDataType   *radarData,
 	    logdNw[i][j]+=0.2; //previously 0.2
 	    if(*wfractPix>10)
 	      logdNw[i][j]+=0.1; //previously 0.0
+	    if(j<=5 && nodeP[j]<=stormStruct->nodes[4])
+	      {
+		float dm;
+		get_dm_from_zku_(&radarData->z13obs[nodeP[j]],&logdNw[i][j],&dm);
+		get_dnw_from_dm_(&radarData->z13obs[nodeP[j]],&logdNw[i][j],&dm);
+	      }
 	    int dnode=stormStruct->nodes[2]-stormStruct->nodes[0];
 	    //if(dnode>=8 && dnode<28)
 	    //  logdNw[i][j]-=0.2;

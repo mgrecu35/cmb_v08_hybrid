@@ -1,5 +1,5 @@
 subroutine radarRetSub4_FS(nmu2,  nmfreq2,   icL, tbRgrid,               &
-      dprrain,ichunk,orbNumb,ialg,idir,nscans_c)
+      dprrain,ichunk,orbNumb,ialg,idir,nscans_c, precip_thresh)
 !  SFM  end    12/13/2013
   use local_RD_var
   use globalData
@@ -86,6 +86,7 @@ subroutine radarRetSub4_FS(nmu2,  nmfreq2,   icL, tbRgrid,               &
   real :: initnw_NS(nbin, 49, 300), initnw_MS(nbin, 49, 300) 
   real :: princomp_NS(5, 49, 300), princomp_MS(5, 49, 300)
   real :: surfprecipbiasratio_NS(49, 300), surfprecipbiasratio_MS(49, 300)
+  real :: precip_thresh
 !end    WSO 2/8/17 
   integer :: l, ipias(2)
   character*3 :: ifdpr, iftest
@@ -131,7 +132,8 @@ subroutine radarRetSub4_FS(nmu2,  nmfreq2,   icL, tbRgrid,               &
   real :: sfcRainLiqFrac(49, 300)
   real :: sfcRainLiqFracMS(49, 300)
   real :: tbMax1(15), tbMin1(15)
-
+  real :: gmi_sfc_precip_aligned(300,49), radar_sfc_precip_t(300,49)
+  
 !  SFM  begin  07/29/2014; for M.Grecu  eliminate NANs
 !  SFM  begin  06/22/2014
   real :: wfractPix, windPert(100), windPertU(100), windPertV(100), qvPert(100), dnqv
@@ -164,9 +166,10 @@ subroutine radarRetSub4_FS(nmu2,  nmfreq2,   icL, tbRgrid,               &
   real    :: pRateOut(nscans,npixs,nlev), swcOut(nscans,npixs,nlev), nwOut(nscans,npixs,nlev)
   integer :: sfcBin(nscans,npixs)
   real    :: tbsim(nscans,npixs,nchans)
-  integer :: flagScanPattern, flagScanPattern_0
+  integer :: flagScanPattern, flagScanPattern_0, j_gmi
   real    :: dm3d_a(nbin,49,300), dm3dMS_a(nbin,49,300), log10NwMean_a(nbin), &
        nw3d_a(nbin,49,300), nw3dms_a(nbin,49,300)
+  real  :: gmi_parallax_disp(300)
 
   data env_levs/18., 14., 10., 8., 6., 4., 2., 1., 0.5, 0./
   iconv=1
@@ -831,7 +834,46 @@ print*, 'before out'
 !print*, tbMean(24,:,1)
 !stop
 nf=9
+!real :: precip_gmi_only(n_size,n_ray), precip_corra(n_size,n_ray)
+!align_precip(precip_gmi_only, precip_corra, precip_gmi_only_shifted, n_size, n_ray)
+!real :: gmi_sfc_precip_aligned(300,49), radar_sfc_precip_t(300,49)
+do i=1,49
+   do j=1,dPRData%n1c21
+      radar_sfc_precip_t(j,i)=sfcRain(i,j)
+      ge_data%GEestimSurfPrecipTotRate(j,i)=dPRData%nn_output(2,i,j)
+   enddo
+enddo
+call align_precip(ge_data%GEestimSurfPrecipTotRate(1:dPRData%n1c21,:),&
+     radar_sfc_precip_t(1:dPRData%n1c21,:),gmi_sfc_precip_aligned(1:dPRData%n1c21,:),&
+     gmi_parallax_disp(1:dPRData%n1c21),dPRData%n1c21,49)
 
+do i=1,49
+   do j=1,dPRData%n1c21
+      if(gmi_sfc_precip_aligned(j,i).ge.precip_thresh.and.(dPRData%rainType(i,j).eq.0) ) then
+         sfcRain(i,j)=gmi_sfc_precip_aligned(j,i)
+         sfcRainMS(i,j)=gmi_sfc_precip_aligned(j,i)
+         do k=1,88
+            j_gmi=int(j + gmi_parallax_disp(j))
+            if(j_gmi<1) j_gmi=1
+            if(j_gmi>dPRData%n1c21) j_gmi=dPRData%n1c21
+            eLon=dPRData%xlon(i,j)
+            eLat=dPRData%xlat(i,j)
+            call getwfraction(eLat,eLon,wfractPix)
+            sfcBin(j,i)= dprData%binRealSurface(i,j)
+            if(wfractPix<50) then
+               ge_data%GEprecipTotRate(j_gmi,i,82:dPRData%binRealSurface(i,j))=ge_data%GEprecipTotRate(j_gmi,i,82)
+               ge_data%GEprecipTotRate(j_gmi,i,dPRData%binRealSurface(i,j):88)=missing_r4
+            else
+               ge_data%GEprecipTotRate(j_gmi,i,84:dPRData%binRealSurface(i,j))=ge_data%GEprecipTotRate(j_gmi,i,84)
+               ge_data%GEprecipTotRate(j_gmi,i,dPRData%binRealSurface(i,j):88)=missing_r4
+            endif
+            rrate3D(k,i,j)=ge_data%GEprecipTotRate(j_gmi,i,k)
+            rrate3DMS(k,i,j)=ge_data%GEprecipTotRate(j_gmi,i,k)
+         enddo
+         dPRData%rainType(i,j)=400
+      endif
+   enddo
+enddo
 
 print*, 'ialg=',ialg
 !  SFM  begin  12/13/2013; conditional to rewind dpr

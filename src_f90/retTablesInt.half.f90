@@ -1,4 +1,18 @@
-
+subroutine get_dm_from_zku(zku,dnw,dm)
+  use tables2
+  real :: zku
+  integer :: idx
+  i0=(zku-10.*dnw-zmin)/dzbin+1
+  dm=d013TableS2(i0,3)
+end subroutine get_dm_from_zku
+subroutine get_dnw_from_dm(zku,dnw,dm) !Sept 17, 2015 MG begin 
+  use tables2
+  real :: zku,zku_tables
+  integer :: idx
+  call bisection2(d013TableS2(:,3),nbinS2,0.8*dm,idx)
+  zku_tables=zmin+idx*dzbin
+  dnw=(zku-zku_tables)/10.
+end subroutine get_dnw_from_dm
 
 
 subroutine integratecvHB(z13,z35,i1,i2,pia13,pia35,z35mod,pwc,n0w,&
